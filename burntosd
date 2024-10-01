@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Check if the user provided the drive name (e.g., sdb)
+if [ -z "$1" ]; then
+    echo "Usage: $0 <drive-name>"
+    echo "Example: $0 sdb"
+    exit 1
+fi
+
+# Set the drive variable
+DRIVE=$1
+
+# Unmount all partitions of the specified drive
+echo "Unmounting all partitions on /dev/$DRIVE..."
+sudo umount /dev/${DRIVE}?*
+
+# Verify if the unmounting was successful
+if [ $? -ne 0 ]; then
+    echo "Failed to unmount /dev/$DRIVE. Please check if the drive is in use."
+#    exit 1
+fi
+
+# Delete all partitions on the specified drive
+echo "Deleting all partitions on /dev/$DRIVE..."
+sudo parted /dev/$DRIVE --script mklabel gpt
+
+# Verify if the partition deletion was successful
+if [ $? -ne 0 ]; then
+    echo "Failed to delete partitions on /dev/$DRIVE."
+    exit 1
+fi
+
+# Grant write permission to the specified drive
+sudo chmod 666 /dev/$DRIVE
+
+# Verify if the permission change was successful
+if [ $? -ne 0 ]; then
+    echo "Failed to change permissions on /dev/$DRIVE. Please check the drive name and try again."
+    exit 1
+fi
+
+# Define the path to your image and machine
+BUILD_DIR="build/tmp/deploy/images/raspberrypi4-64"
+IMAGE_FILE=$(ls $BUILD_DIR/aesdproj-image-raspberrypi4-64.rootfs-*.wic 2>/dev/null | head -n 1)
+
+# Verify if the image file exists
+if [ -z "$IMAGE_FILE" ]; then
+    echo "Image file not found in $BUILD_DIR. Please check the build directory."
+    exit 1
+fi
+
+# Write the image to the drive using bmaptool
+oe-run-native bmaptool-native bmaptool copy "$IMAGE_FILE" /dev/$DRIVE
+
+# Check if bmaptool copy was successful
+if [ $? -eq 0 ]; then
+    echo "Image successfully written to /dev/$DRIVE"
+else
+    echo "Failed to write image to /dev/$DRIVE\nMake sure you sourced poky first to be abel to use oe-run-native bmaptool-native\n"
+    exit 1
+fi
+
