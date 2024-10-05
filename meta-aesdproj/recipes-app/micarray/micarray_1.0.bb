@@ -12,7 +12,7 @@ SRCREV = "${AUTOREV}"
 S = "${WORKDIR}/git"
 
 # Dependencies for your application (e.g., for ALSA, etc.)
-DEPENDS += "alsa-lib"
+DEPENDS += "alsa-lib libusb1 pkgconfig-native"
 
 inherit cmake
 # or autotools, if using that build system
