@@ -73,7 +73,8 @@ else
 	echo "meta-raspberrypi layer already exists"
 fi
 
-echo "If bitbake failes and you are using Ubuntu 24.04, you need to first run this command\nsudo apparmor_parser -R /etc/apparmor.d/unprivileged_userns\n"
+echo "If bitbake failes and you are using Ubuntu 24.04, you need to first run this command"
+echo "sudo apparmor_parser -R /etc/apparmor.d/unprivileged_userns"
 
 set -e
 bitbake aesdproj-image
