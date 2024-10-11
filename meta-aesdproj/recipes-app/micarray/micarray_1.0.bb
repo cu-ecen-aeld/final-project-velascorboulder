@@ -1,5 +1,5 @@
 SUMMARY = "Mic Array"
-DESCRIPTION = "An application that creates a microphone array from usb microphones"
+DESCRIPTION = "An application that creates a microphone array from USB microphones"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=76dd0cf4faac38c6310a417ff5bb36b9"
 
@@ -11,6 +11,11 @@ SRCREV = "${AUTOREV}"
 # Directory where the application will be built (in ${WORKDIR})
 S = "${WORKDIR}/git"
 
+inherit update-rc.d
+
+INITSCRIPT_PACKAGES = "${PN}"
+INITSCRIPT_NAME = "MicArray-start-stop"
+
 # Dependencies for your application (e.g., for ALSA, etc.)
 DEPENDS += "alsa-lib libusb1 pkgconfig-native gstreamer1.0 gstreamer1.0-plugins-base"
 
@@ -20,5 +25,12 @@ inherit cmake
 do_install() {
     install -d ${D}${bindir}
     install -m 0755 MicArray ${D}${bindir}
+
+    # Install the init.d startup script from the GitHub repo
+    install -d ${D}${sysconfdir}/init.d
+    install -m 0755 ${S}/MicArray-start-stop ${D}${sysconfdir}/init.d
 }
+
+# Packaging additional files
+FILES_${PN} += "${sysconfdir}/init.d/MicArray-start-stop"
 
